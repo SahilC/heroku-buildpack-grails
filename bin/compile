@@ -28,28 +28,32 @@ check_build_status()
 install_grails()
 {
   VER_TO_INSTALL=$1
-  GRAILS_URL="http://s3.amazonaws.com/heroku-jvm-buildpack-grails/grails-2.3.2.tar.gz"
+  GRAILS_URL="http://dist.springframework.org.s3.amazonaws.com/release/GRAILS/grails-2.3.2.zip"
 
-  GRAILS_TAR_FILE="grails-heroku.tar.gz"
+  GRAILS_ZIP_FILE="grails-heroku.zip"
   echo "-----> Installing Grails $VER_TO_INSTALL....."
-  curl --silent --max-time 150 --location $GRAILS_URL -o $GRAILS_TAR_FILE
+  curl --silent --max-time 150 --location $GRAILS_URL -o $GRAILS_ZIP_FILE
 
   # Error checking
-  if [ ! -f $GRAILS_TAR_FILE ]; then
-    echo "-----> Error downloading Grails framework. Please try again..."
+  if [ ! -f $GRAILS_ZIP_FILE ]; then
+echo "-----> Error downloading Grails framework. Please try again..."
     exit 1
   fi
-  if [ -z "`file $GRAILS_TAR_FILE | grep gzip`" ]; then
-    echo "-----> Error installing Grails framework or unsupported Grails framework version specified. Please review Dev Center for a list of supported versions."
+if [ -z "`file $GRAILS_ZIP_FILE | grep Zip`" ]; then
+echo "-----> Error installing Grails framework or unsupported Grails framework version specified. Please review Dev Center for a list of supported versions."
     exit 1
   fi
 
-  tar xzf $GRAILS_TAR_FILE
-  rm $GRAILS_TAR_FILE
+  #use jar because unzip isn't available
+  jar xf $GRAILS_ZIP_FILE
+  rm $GRAILS_ZIP_FILE
+  #copy to standard dir location
+  mv grails-$VER_TO_INSTALL $GRAILS_DIR
+  #make grails command executable
+  chmod +x $GRAILS_DIR/bin/grails
 
   echo "-----> Done"
 }
-
 if [ ! -f $BUILD_DIR/application.properties ] ; then
     echo "-----> File not found: application.properties. This file is required. Build failed."
     echo " !     Failed to build app"
